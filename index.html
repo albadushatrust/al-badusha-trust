@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Al Badusha Trust - Account Manager</title>
+    <meta name="description" content="Simple account management for Al Badusha Charitable Trust">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileMenu()"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     LOGIN PAGE
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="login-page" id="loginPage">
+    <div class="login-card">
+        <div class="login-logo">
+            <img src="logo.png" alt="Al Badusha Trust" class="brand-logo" onerror="this.onerror=null;this.src='logo.svg';">
+        </div>
+        <h2>AL <span>BADUSHA</span> TRUST</h2>
+        <p class="login-sub">Account Management System</p>
+        
+        <form onsubmit="handleLogin(event)">
+            <div class="login-field">
+                <i class="fas fa-user"></i>
+                <input type="text" id="loginUser" placeholder="Username" required autocomplete="off">
+            </div>
+            <div class="login-field">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="loginPass" placeholder="Password" required>
+            </div>
+            <div class="login-error" id="loginError"></div>
+            <button type="submit" class="login-btn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </form>
+        
+        <div class="login-footer">
+            <p>Nagore, Tamil Nadu</p>
+        </div>
+    </div>
+</div>
+
+<div class="app" id="appMain" style="display:none">
+
+    <header class="mobile-header">
+        <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="Open menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <img src="logo.png" alt="Al Badusha Trust" class="mobile-header-logo brand-logo" onerror="this.onerror=null;this.src='logo.svg';">
+        <div class="mobile-header-text">
+            <strong>AL BADUSHA TRUST</strong>
+            <small>Account Manager</small>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         SIDEBAR
+         ═══════════════════════════════════════════════════════════════════ -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <img src="logo.png" alt="Al Badusha Trust Logo" class="brand-logo" onerror="this.onerror=null;this.src='logo.svg';">
+            <h2>AL <span>BADUSHA</span></h2>
+            <p>Trust Accounts</p>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button class="nav-btn active" data-tab="dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </button>
+            <button class="nav-btn" data-tab="donations" data-admin-only>
+                <i class="fas fa-hand-holding-heart"></i> Donations
+            </button>
+            <button class="nav-btn" data-tab="expenses">
+                <i class="fas fa-receipt"></i> Expenses
+            </button>
+            <button class="nav-btn" data-tab="settings" data-admin-only onclick="loadSettings()">
+                <i class="fas fa-cog"></i> Settings
+            </button>
+            <button class="nav-btn" data-tab="users" data-admin-only onclick="renderUsers()">
+                <i class="fas fa-users"></i> Users
+            </button>
+            <button class="nav-btn" onclick="logout()" style="margin-top: auto; color: var(--danger);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p><span>Al Badusha</span> Charitable Trust</p>
+            <p style="margin-top:4px">Nagore, Tamil Nadu</p>
+        </div>
+    </aside>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         MAIN CONTENT
+         ═══════════════════════════════════════════════════════════════════ -->
+    <main class="main">
+
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <img src="logo.png" alt="Al Badusha Trust" class="mobile-top-logo brand-logo" onerror="this.onerror=null;this.src='logo.svg';">
+                <div>
+                    <h1>AL BADUSHA TRUST</h1>
+                    <p data-i18n="subtitle">Simple Account Management</p>
+                </div>
+            </div>
+            <div class="top-bar-right">
+                <button type="button" class="btn btn-outline btn-sm" id="refreshDataBtn" onclick="refreshSharedData()" title="Reload shared data">
+                    <i class="fas fa-rotate"></i> Refresh
+                </button>
+                <span class="fy-pill" id="fyPill">FY 2025-26</span>
+                <div class="session-info" id="sessionInfo"></div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             TAB 1: DASHBOARD
+             ══════════════════════════════════════════════════════════════ -->
+        <section id="dashboard" class="tab active">
+
+            <!-- Summary Cards -->
+            <div class="stats-row">
+                <div class="stat-card green">
+                    <div class="stat-label">💰 Total Received</div>
+                    <div class="stat-value" id="statIn">₹0</div>
+                    <div class="stat-note">Money people gave to the trust</div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-label">📚 Total Spent</div>
+                    <div class="stat-value" id="statOut">₹0</div>
+                    <div class="stat-note">Money used for education, medical etc.</div>
+                </div>
+                <div class="stat-card gold">
+                    <div class="stat-label">🏦 Balance</div>
+                    <div class="stat-value" id="statBalance">₹0</div>
+                    <div class="stat-note">Remaining funds available</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">🤝 Total Donations</div>
+                    <div class="stat-value" id="statDonors">0</div>
+                    <div class="stat-note">Number of donations received</div>
+                </div>
+            </div>
+
+            <!-- Where Money Goes + Recent Activity -->
+            <div class="summary-grid">
+
+                <!-- Where money was used -->
+                <div class="card">
+                    <div class="card-head">
+                        <h3><i class="fas fa-chart-pie"></i> Where Money Was Used</h3>
+                    </div>
+                    <div class="purpose-list" id="purposeList">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-head">
+                        <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                    </div>
+                    <div class="recent-list" id="recentList">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             TAB 2: DONATIONS (Money In)
+             ══════════════════════════════════════════════════════════════ -->
+        <section id="donations" class="tab">
+            <div class="card">
+                <div class="card-head">
+                    <h3><i class="fas fa-hand-holding-heart"></i> Donations — People Who Gave Money</h3>
+                </div>
+
+                <div class="action-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="donSearch" placeholder="Search by name, receipt no..." oninput="renderDonations()">
+                    </div>
+                    <button class="btn btn-primary" onclick="openAddDonation()">
+                        <i class="fas fa-plus"></i> Add Donation
+                    </button>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="responsive-table">
+                        <thead>
+                            <tr>
+                                <th>Receipt #</th>
+                                <th>Date</th>
+                                <th>Donor Name</th>
+                                <th>Mode</th>
+                                <th>Purpose</th>
+                                <th style="text-align:right">Amount</th>
+                                <th style="text-align:right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="donBody">
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             TAB 3: EXPENSES (Money Out)
+             ══════════════════════════════════════════════════════════════ -->
+        <section id="expenses" class="tab">
+            <div class="card">
+                <div class="card-head">
+                    <h3><i class="fas fa-receipt"></i> Expenses — How Money Was Used</h3>
+                </div>
+
+                <div class="action-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="expSearch" placeholder="Search expenses..." oninput="renderExpenses()">
+                    </div>
+                    <button class="btn btn-gold" data-admin-only onclick="openAddExpense()">
+                        <i class="fas fa-plus"></i> Add Expense
+                    </button>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="responsive-table">
+                        <thead>
+                            <tr>
+                                <th>Voucher #</th>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th>Paid To</th>
+                                <th style="text-align:right">Amount</th>
+                                <th style="text-align:right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expBody">
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             TAB 4: SETTINGS
+             ══════════════════════════════════════════════════════════════ -->
+        <section id="settings" class="tab">
+            <div class="card">
+                <div class="card-head">
+                    <h3><i class="fas fa-cog"></i> Trust Settings</h3>
+                </div>
+
+                <form onsubmit="saveSettings(event)">
+                    <div class="form-row">
+                        <div class="field">
+                            <label>Trust Name</label>
+                            <input type="text" id="setName" required>
+                        </div>
+                        <div class="field">
+                            <label>Financial Year</label>
+                            <select id="setFY">
+                                <option value="2025-26">2025-26</option>
+                                <option value="2026-27">2026-27</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <div class="field">
+                            <label>Address</label>
+                            <textarea id="setAddress" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="field">
+                            <label>Email</label>
+                            <input type="email" id="setEmail">
+                        </div>
+                        <div class="field">
+                            <label>Phone</label>
+                            <input type="tel" id="setPhone">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="field">
+                            <label>PAN Number</label>
+                            <input type="text" id="setPan">
+                        </div>
+                        <div class="field">
+                            <label>Registration Number</label>
+                            <input type="text" id="setReg">
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <div class="field">
+                            <label>Trustee Members</label>
+                            <div id="trusteeListContainer">
+                                <!-- Loaded from JS -->
+                            </div>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="addTrusteeField()" style="margin-top: 8px;">
+                                <i class="fas fa-plus"></i> Add Trustee Member
+                            </button>
+                        </div>
+                    </div>
+                    <div style="margin-top:20px">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Settings</button>
+                    </div>
+                </form>
+
+                <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+
+                <div class="data-backup-section">
+                    <h3 style="margin-bottom: 15px; font-size: 16px; color: var(--primary-dark);"><i class="fas fa-database"></i> Data Backup & Restore</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Export your data to a file for safekeeping, import a previously saved backup, or download an Excel report.</p>
+                    <div class="backup-actions">
+                        <button class="btn btn-outline" onclick="exportData()"><i class="fas fa-download"></i> Export Backup</button>
+                        <button class="btn btn-gold" onclick="document.getElementById('importFile').click()"><i class="fas fa-upload"></i> Import Backup</button>
+                        <button class="btn btn-primary" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Download Excel</button>
+                        <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             TAB 5: USERS (Admin only)
+             ══════════════════════════════════════════════════════════════ -->
+        <section id="users" class="tab">
+            <div class="card">
+                <div class="card-head">
+                    <h3><i class="fas fa-users"></i> User Accounts</h3>
+                </div>
+
+                <div class="action-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="userSearch" placeholder="Search by username..." oninput="renderUsers()">
+                    </div>
+                    <button class="btn btn-primary" onclick="openAddUser()">
+                        <i class="fas fa-plus"></i> Add User
+                    </button>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="responsive-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th style="text-align:right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userBody">
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODAL: Add Donation
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-bg" id="donModal">
+    <div class="modal">
+        <div class="modal-top">
+            <h3><i class="fas fa-hand-holding-heart"></i> Add <span>Donation</span></h3>
+            <button class="close-btn" onclick="closeDonModal()">&times;</button>
+        </div>
+        <form id="donForm" onsubmit="saveDonation(event)">
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="field">
+                        <label>Receipt # (Auto)</label>
+                        <input type="text" id="donFormId" readonly style="background:#f1f5f9">
+                    </div>
+                    <div class="field">
+                        <label>Date <span class="req">*</span></label>
+                        <input type="date" id="donFormDate" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label>Donor Name <span class="req">*</span></label>
+                        <input type="text" id="donFormName" placeholder="Who gave the money?" required>
+                    </div>
+                    <div class="field">
+                        <label>Phone Number</label>
+                        <input type="tel" id="donFormPhone" placeholder="Mobile number">
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="field">
+                        <label>Address</label>
+                        <input type="text" id="donFormAddress" placeholder="Donor's address">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label>Amount (₹) <span class="req">*</span></label>
+                        <input type="number" id="donFormAmount" placeholder="How much?" min="1" required>
+                    </div>
+                    <div class="field">
+                        <label>Payment Mode</label>
+                        <select id="donFormMode">
+                            <option value="Cash">Cash</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Cheque">Cheque</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label>Purpose</label>
+                        <select id="donFormPurpose">
+                            <option value="Education">📚 Education</option>
+                            <option value="Medical">🏥 Medical</option>
+                            <option value="Food">🍲 Food Distribution</option>
+                            <option value="Infrastructure">🏗️ Infrastructure</option>
+                            <option value="Majlis">🕌 Majlis</option>
+                            <option value="Poor Giveaway">🎁 Poor Giveaway</option>
+                            <option value="Marriage">💍 Marriage</option>
+                            <option value="General">💛 General Fund</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Authorized Signatory <span class="req">*</span></label>
+                        <select id="donFormSignatory" required>
+                            <!-- Dynamically populated from trustees list -->
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="field">
+                        <label>Notes</label>
+                        <input type="text" id="donFormNotes" placeholder="Optional notes...">
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="field">
+                        <label>Upload Receipt/Proof</label>
+                        <input type="file" id="donFormAttachment" accept="image/*,.pdf">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button type="button" class="btn btn-outline" onclick="closeDonModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Donation</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODAL: Add Expense
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-bg" id="expModal">
+    <div class="modal">
+        <div class="modal-top">
+            <h3 id="expModalTitle"><i class="fas fa-receipt"></i> Add <span>Expense</span></h3>
+            <button class="close-btn" onclick="closeExpModal()">&times;</button>
+        </div>
+        <form id="expForm" onsubmit="saveExpense(event)">
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="field">
+                        <label>Voucher # (Auto)</label>
+                        <input type="text" id="expFormId" readonly style="background:#f1f5f9">
+                    </div>
+                    <div class="field">
+                        <label>Date <span class="req">*</span></label>
+                        <input type="date" id="expFormDate" required>
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="field">
+                        <label>What was the money used for? <span class="req">*</span></label>
+                        <input type="text" id="expFormDesc" placeholder="e.g. School books for 50 students" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label>Category</label>
+                        <select id="expFormCategory">
+                            <option value="Education">📚 Education</option>
+                            <option value="Medical">🏥 Medical</option>
+                            <option value="Food">🍲 Food Distribution</option>
+                            <option value="Infrastructure">🏗️ Infrastructure</option>
+                            <option value="Majlis">🕌 Majlis</option>
+                            <option value="Poor Giveaway">🎁 Poor Giveaway</option>
+                            <option value="Marriage">💍 Marriage</option>
+                            <option value="General">💛 General / Admin</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Amount (₹) <span class="req">*</span></label>
+                        <input type="number" id="expFormAmount" placeholder="How much?" min="1" required>
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="field">
+                        <label>Paid To</label>
+                        <input type="text" id="expFormPaidTo" placeholder="Shop/Person who received the payment">
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="field">
+                        <label>Upload Bill/Receipt</label>
+                        <input type="file" id="expFormAttachment" accept="image/*,.pdf">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button type="button" class="btn btn-outline" onclick="closeExpModal()">Cancel</button>
+                <button type="submit" class="btn btn-gold" id="expSubmitBtn"><i class="fas fa-save"></i> Save Expense</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODAL: Add / Edit User
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-bg" id="userModal">
+    <div class="modal">
+        <div class="modal-top">
+            <h3 id="userModalTitle"><i class="fas fa-user-plus"></i> Add <span>User</span></h3>
+            <button class="close-btn" onclick="closeUserModal()">&times;</button>
+        </div>
+        <form id="userForm" onsubmit="saveUser(event)">
+            <div class="modal-body">
+                <div class="form-row full">
+                    <div class="field">
+                        <label>Username <span class="req">*</span></label>
+                        <input type="text" id="userFormUsername" placeholder="Login username" required autocomplete="off">
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="field">
+                        <label id="userFormPasswordLabel">Password <span class="req">*</span></label>
+                        <input type="password" id="userFormPassword" placeholder="Min. 4 characters" autocomplete="new-password">
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <div class="field">
+                        <label>Role <span class="req">*</span></label>
+                        <select id="userFormRole" required>
+                            <option value="admin">Admin — full access</option>
+                            <option value="viewer">Viewer — dashboard & expenses (read-only)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button type="button" class="btn btn-outline" onclick="closeUserModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="userSubmitBtn"><i class="fas fa-save"></i> Save User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODAL: Receipt Preview (Printable)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="modal-bg receipt-modal" id="receiptModal">
+    <div class="modal receipt-modal-inner">
+        <div class="modal-top">
+            <h3><i class="fas fa-print"></i> Donation <span>Receipt</span></h3>
+            <button class="close-btn" onclick="closeReceiptModal()">&times;</button>
+        </div>
+
+        <div class="modal-body receipt-modal-body">
+            <!-- Edit Alert Info Box -->
+            <div class="receipt-edit-alert">
+                <i class="fas fa-info-circle"></i>
+                <span><strong>Interactive Receipt:</strong> Click any text on the receipt below to edit it directly. Click <strong>Save Changes</strong> to update the database.</span>
+            </div>
+
+            <div class="receipt-paper">
+
+                <!-- Header -->
+                <div class="receipt-header">
+                    <img src="logo.png" alt="Logo" class="brand-logo" onerror="this.onerror=null;this.src='logo.svg';">
+                    <div class="info">
+                        <h2 id="recTrustName" contenteditable="true">AL BADUSHA TRUST</h2>
+                        <p id="recAddress" contenteditable="true">No. 45, Golden Plaza, Nagore - 611002</p>
+                        <p id="recContact" contenteditable="true">Email: contact@albadushatrust.org | Phone: +91 94432 18765</p>
+                        <p class="reg" id="recReg" contenteditable="true">PAN: AABTA4892C | Reg: 12A/URN/2023-24/TN/18928</p>
+                    </div>
+                </div>
+
+                <!-- Title -->
+                <div class="receipt-title">DONATION RECEIPT</div>
+
+                <!-- Meta -->
+                <div class="receipt-meta">
+                    <span>Receipt #: <strong id="recId">REC-001</strong></span>
+                    <span>Date: <strong id="recDate" contenteditable="true">2025-04-12</strong></span>
+                    <span>FY: <strong id="recFY" contenteditable="true">2025-26</strong></span>
+                </div>
+
+                <!-- Body -->
+                <div class="receipt-body">
+                    Received with thanks from <span class="hl" id="recDonor" contenteditable="true">Aarav Sharma</span>,
+                    residing at <span class="hl" id="recDonorAddr" contenteditable="true">Chennai</span>,
+                    a sum of Rupees <span class="hl" id="recAmtWords" contenteditable="true">Twenty Five Thousand Rupees Only</span>
+                    by way of <span class="hl" id="recMode" contenteditable="true">Bank Transfer</span>
+                    towards the <span class="hl" id="recPurpose" contenteditable="true">Education</span> fund of the trust.
+                </div>
+
+                <!-- Remarks Box -->
+                <div class="receipt-remarks" id="recRemarksBox" style="display: none;">
+                    <strong>Notes:</strong> <span id="recNotes" contenteditable="true"></span>
+                </div>
+
+                <!-- Amount -->
+                <div class="receipt-amount-box">
+                    <div class="label">AMOUNT RECEIVED</div>
+                    <div class="amt" id="recAmount" contenteditable="true">₹25,000/-</div>
+                </div>
+
+                <!-- Note -->
+                <div class="receipt-note">
+                    * This is a computer-generated receipt. Thank you for your generous contribution to Al Badusha Trust.
+                    Your donation helps us provide education, medical aid, and food to those in need.
+                </div>
+
+                <!-- Signature -->
+                <div class="receipt-sign">
+                    <div class="line"></div>
+                    <div class="name" id="recTrustee" contenteditable="true">Syed Al Badusha</div>
+                    <div class="role">Managing Trustee</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="modal-foot">
+            <button class="btn btn-outline" onclick="closeReceiptModal()">Close</button>
+            <button class="btn btn-gold" onclick="saveReceiptChanges()"><i class="fas fa-save"></i> Save Changes</button>
+            <button class="btn btn-primary" onclick="printReceipt()"><i class="fas fa-print"></i> Print / Save PDF</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="mock_data.js"></script>
+<script src="data-service.js"></script>
+<script src="app.js"></script>
+<script src="app-expansion.js"></script>
+
+</body>
+</html>

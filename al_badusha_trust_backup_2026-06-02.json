@@ -1,0 +1,149 @@
+{
+  "settings": {
+    "trustName": "AL BADUSHA TRUST",
+    "address": "7/8, J.H. Street, Nagore - 611002, Tamil Nadu, India",
+    "email": "contact@albadushatrust.org",
+    "phone": "+91 7010105093",
+    "pan": "AABTA4892C",
+    "regNumber": "12A/URN/2023-24/TN/18928",
+    "managingTrustee": "Azmal Hussain Sahib Musthaqi",
+    "trustees": [
+      "Azmal Hussain Sahib Musthaqi",
+      "Syed Ibrahim Musthaqi",
+      "Jamal Musthaqi",
+      "Nazeer Malimar"
+    ],
+    "financialYear": "2026-27"
+  },
+  "donations": [
+    {
+      "id": "REC-001",
+      "date": "2026-05-11",
+      "donorName": "azmal musthaqi",
+      "donorPhone": "9790073739",
+      "donorAddress": "7/8, j.h. street , nagore - 611002",
+      "amount": 100,
+      "mode": "Cash",
+      "purpose": "General",
+      "notes": ""
+    },
+    {
+      "id": "REC-002",
+      "date": "2026-05-14",
+      "donorName": "Jawahir Musthaqi",
+      "donorPhone": "8778898831",
+      "donorAddress": "manjakollai",
+      "amount": 300,
+      "mode": "UPI",
+      "purpose": "Food",
+      "notes": ""
+    },
+    {
+      "id": "REC-003",
+      "date": "2026-05-25",
+      "donorName": "Jamal Musthaqi sg",
+      "donorPhone": "9788888731",
+      "donorAddress": "Nagapttinam - 611002",
+      "amount": 1190,
+      "mode": "UPI",
+      "purpose": "Food",
+      "notes": "payment paid by ajmal sahib"
+    },
+    {
+      "id": "REC-004",
+      "date": "2026-05-27",
+      "donorName": "Nazeer Malim",
+      "donorPhone": "9894563073",
+      "donorAddress": "Peerodum Street , Nagore - 611002",
+      "amount": 1750,
+      "mode": "UPI",
+      "purpose": "Education",
+      "notes": "haja jahabar 10th fees"
+    },
+    {
+      "id": "REC-005",
+      "date": "2026-05-29",
+      "donorName": "nazeer malim",
+      "donorPhone": "9894565373",
+      "donorAddress": "Peerodum Street , Nagore - 611002",
+      "amount": 800,
+      "mode": "UPI",
+      "purpose": "Education",
+      "notes": ""
+    },
+    {
+      "id": "REC-006",
+      "date": "2026-05-29",
+      "donorName": "azmal musthaqi",
+      "donorPhone": "9790073739",
+      "donorAddress": "7/8, j.h. street , nagore - 611002",
+      "amount": 800,
+      "mode": "Cash",
+      "purpose": "Education",
+      "notes": "Fatherless Boy School Kit"
+    },
+    {
+      "id": "REC-007",
+      "date": "2026-06-02",
+      "donorName": "al-badhusha online shop",
+      "donorPhone": "7010105093",
+      "donorAddress": "7/8, j.h. street , nagore - 611002",
+      "amount": 278,
+      "mode": "Cash",
+      "purpose": "General",
+      "signatory": "Azmal Hussain Sahib Musthaqi",
+      "notes": "al-badhusha 2.5% poor giveaway fund"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "EXP-001",
+      "date": "2026-05-14",
+      "description": "Spiritual",
+      "category": "General",
+      "amount": 100,
+      "paidTo": "Sarkar"
+    },
+    {
+      "id": "EXP-002",
+      "date": "2026-05-15",
+      "description": "Food Giveaway for Poor People 3 qty",
+      "category": "Food",
+      "amount": 300,
+      "paidTo": "Darbar Catering"
+    },
+    {
+      "id": "EXP-003",
+      "date": "2026-05-25",
+      "description": "Food Giveaway For Poor People 7 qty",
+      "category": "Food",
+      "amount": 1190,
+      "paidTo": "Ar-Rahim Hotel"
+    },
+    {
+      "id": "EXP-004",
+      "date": "2026-05-27",
+      "description": "School Fees For Haja Jahabar 10th ",
+      "category": "Education",
+      "amount": 1750,
+      "paidTo": "Ghowthiya Higher Secondery School"
+    },
+    {
+      "id": "EXP-005",
+      "date": "2026-05-29",
+      "description": "School Stattionery Set For Father Less Boy",
+      "category": "Education",
+      "amount": 800,
+      "paidTo": "Stationery Shop Nagore"
+    },
+    {
+      "id": "EXP-006",
+      "date": "2026-05-29",
+      "description": "School Stationery Set For Father Less Boy 11th",
+      "category": "Education",
+      "amount": 800,
+      "paidTo": "Stationery Shop"
+    }
+  ],
+  "exportDate": "2026-06-02T10:02:54.617Z"
+}
