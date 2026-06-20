@@ -185,6 +185,89 @@
             .replace(/'/g, '&#039;');
     }
 
+    /** Safe onclick= attribute (JSON.stringify breaks inside double-quoted HTML attrs). */
+    function onClickAttr(handlerCall) {
+        return 'onclick=' + JSON.stringify(handlerCall);
+    }
+
+    function escapeAttr(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function tableActionBtn(action, recordId, className, labelHtml) {
+        return '<button type="button" class="btn btn-sm ' + className + '" data-table-action="' + escapeAttr(action) + '" data-record-id="' + escapeAttr(recordId) + '">' + labelHtml + '</button>';
+    }
+
+    function handleTableActionClick(event) {
+        const btn = event.target.closest('[data-table-action]');
+        if (!btn) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const action = btn.getAttribute('data-table-action');
+        const id = btn.getAttribute('data-record-id');
+        if (!id) return;
+
+        switch (action) {
+            case 'edit-donation':
+                if (typeof window.editDonation === 'function') window.editDonation(id);
+                break;
+            case 'delete-donation':
+                if (typeof window.deleteDonation === 'function') window.deleteDonation(id);
+                break;
+            case 'receipt-donation':
+                if (typeof window.openReceipt === 'function') window.openReceipt(id);
+                break;
+            case 'proof-donation':
+                if (typeof window.viewDonationProof === 'function') window.viewDonationProof(id);
+                break;
+            case 'edit-expense':
+                if (typeof window.editExpense === 'function') window.editExpense(id);
+                break;
+            case 'delete-expense':
+                if (typeof window.deleteExpense === 'function') window.deleteExpense(id);
+                break;
+            case 'voucher-expense':
+                if (typeof window.openExpenseVoucher === 'function') window.openExpenseVoucher(id);
+                break;
+            case 'bill-expense':
+                if (typeof window.viewExpenseBill === 'function') window.viewExpenseBill(id);
+                break;
+            default:
+                break;
+        }
+    }
+
+    function setupTableActionDelegation() {
+        const donBody = document.getElementById('donBody');
+        const expBody = document.getElementById('expBody');
+
+        if (donBody && !donBody.dataset.actionsBound) {
+            donBody.dataset.actionsBound = '1';
+            donBody.addEventListener('click', handleTableActionClick);
+        }
+
+        if (expBody && !expBody.dataset.actionsBound) {
+            expBody.dataset.actionsBound = '1';
+            expBody.addEventListener('click', handleTableActionClick);
+        }
+    }
+
+    window.viewDonationProof = function (id) {
+        const d = (data.donations || []).find(function (x) { return x.id === id; });
+        if (d && d.attachment && typeof viewAttachment === 'function') viewAttachment(d.attachment);
+    };
+
+    window.viewExpenseBill = function (id) {
+        const e = (data.expenses || []).find(function (x) { return x.id === id; });
+        if (e && e.attachment && typeof viewAttachment === 'function') viewAttachment(e.attachment);
+    };
+
     // =========================
     // PHASE 1: FILTERS / DASHBOARD
     // =========================
@@ -1497,9 +1580,8 @@
         }
 
         filtered.forEach(function (d) {
-            const idJson = JSON.stringify(d.id);
             const attachBtn = d.attachment
-                ? '<button class="btn btn-outline btn-sm" onclick="viewAttachment(' + JSON.stringify(d.attachment) + ')"><i class="fas fa-paperclip"></i> Proof</button>'
+                ? tableActionBtn('proof-donation', d.id, 'btn-outline', '<i class="fas fa-paperclip"></i> Proof')
                 : '';
             body.innerHTML += '<tr>' +
                 '<td><strong>' + sanitizeText(d.id) + '</strong></td>' +
@@ -1508,11 +1590,11 @@
                 '<td><span class="badge ' + (d.mode === 'Cash' ? 'badge-cash' : 'badge-bank') + '">' + sanitizeText(d.mode) + '</span></td>' +
                 '<td><span class="badge ' + getBadgeClass(d.purpose) + '">' + sanitizeText(d.purpose) + '</span><div style="font-size:11px;color:var(--text-muted)">Ref: ' + sanitizeText(d.referenceNo || '-') + '</div></td>' +
                 '<td class="amount green" style="text-align:right">' + money(d.amount) + '<div style="font-size:11px;color:var(--text-muted)">Bal: ' + money(runningMap[d.id] || 0) + '</div></td>' +
-                '<td style="text-align:right">' +
+                '<td class="table-actions" style="text-align:right">' +
                 attachBtn +
-                '<button class="btn btn-outline btn-sm" onclick="editDonation(' + idJson + ')"><i class="fas fa-edit"></i> Edit</button>' +
-                '<button class="btn btn-outline btn-sm" onclick="openReceipt(' + idJson + ')"><i class="fas fa-print"></i> Receipt</button>' +
-                '<button class="btn btn-danger btn-sm" onclick="deleteDonation(' + idJson + ')"><i class="fas fa-trash"></i></button>' +
+                tableActionBtn('edit-donation', d.id, 'btn-outline', '<i class="fas fa-edit"></i> Edit') +
+                tableActionBtn('receipt-donation', d.id, 'btn-outline', '<i class="fas fa-print"></i> Receipt') +
+                tableActionBtn('delete-donation', d.id, 'btn-danger', '<i class="fas fa-trash"></i>') +
                 '</td></tr>';
         });
 
@@ -1546,13 +1628,15 @@
         }
 
         filtered.forEach(function (e) {
-            const idJson = JSON.stringify(e.id);
+            const billBtn = e.attachment
+                ? tableActionBtn('bill-expense', e.id, 'btn-outline', '<i class="fas fa-file-invoice"></i> Bill')
+                : '';
             const adminActions = isAdmin()
-                ? (e.attachment ? '<button class="btn btn-outline btn-sm" onclick="viewAttachment(' + JSON.stringify(e.attachment) + ')"><i class="fas fa-file-invoice"></i> Bill</button>' : '') +
-                    '<button class="btn btn-outline btn-sm" onclick="openExpenseVoucher(' + idJson + ')"><i class="fas fa-print"></i> Voucher</button>' +
-                    '<button class="btn btn-outline btn-sm" onclick="editExpense(' + idJson + ')"><i class="fas fa-edit"></i> Edit</button>' +
-                    '<button class="btn btn-danger btn-sm" onclick="deleteExpense(' + idJson + ')"><i class="fas fa-trash"></i></button>'
-                : (e.attachment ? '<button class="btn btn-outline btn-sm" onclick="viewAttachment(' + JSON.stringify(e.attachment) + ')"><i class="fas fa-file-invoice"></i> Bill</button>' : '');
+                ? billBtn +
+                    tableActionBtn('voucher-expense', e.id, 'btn-outline', '<i class="fas fa-print"></i> Voucher') +
+                    tableActionBtn('edit-expense', e.id, 'btn-outline', '<i class="fas fa-edit"></i> Edit') +
+                    tableActionBtn('delete-expense', e.id, 'btn-danger', '<i class="fas fa-trash"></i>')
+                : billBtn;
 
             body.innerHTML += '<tr>' +
                 '<td><strong>' + sanitizeText(e.id) + '</strong></td>' +
@@ -1561,7 +1645,7 @@
                 '<td><span class="badge ' + getBadgeClass(e.category) + '">' + sanitizeText(e.category) + '</span></td>' +
                 '<td style="font-size:12px;color:var(--text-muted)">' + sanitizeText(e.paidTo) + '</td>' +
                 '<td class="amount red" style="text-align:right">' + money(e.amount) + '<div style="font-size:11px;color:var(--text-muted)">Bal: ' + money(runningMap[e.id] || 0) + '</div></td>' +
-                '<td style="text-align:right">' + adminActions + '</td>' +
+                '<td class="table-actions" style="text-align:right">' + adminActions + '</td>' +
                 '</tr>';
         });
 
@@ -1698,6 +1782,7 @@
         setupKeyboardShortcuts();
         setupSessionTimeout();
         setupUnsavedFormGuard();
+        setupTableActionDelegation();
 
         document.querySelectorAll('.nav-btn[data-tab]').forEach(function (btn) {
             btn.addEventListener('click', function () {

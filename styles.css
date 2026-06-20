@@ -368,6 +368,18 @@ tbody td {
 
 tbody tr:hover { background: rgba(17,92,58,0.02); }
 
+.table-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.table-actions .btn {
+    flex-shrink: 0;
+}
+
 .amount { text-align: right; font-weight: 700; font-family: 'Outfit', sans-serif; }
 .amount.green { color: var(--success); }
 .amount.red { color: var(--danger); }
@@ -1567,6 +1579,7 @@ tbody tr:hover { background: rgba(17,92,58,0.02); }
         flex: 0 0 38%;
         max-width: 38%;
         padding-right: 8px;
+        pointer-events: none;
     }
 
     .responsive-table tbody td.empty-msg,
@@ -1589,9 +1602,11 @@ tbody tr:hover { background: rgba(17,92,58,0.02); }
         gap: 6px;
     }
 
-    .responsive-table tbody td[data-label="Actions"]::before,
-    .responsive-table tbody td[data-label="Action"]::before {
-        margin-bottom: 2px;
+    .responsive-table tbody td[data-label="Actions"] .table-actions,
+    .responsive-table tbody td[data-label="Action"] .table-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .responsive-table tbody td[data-label="Actions"] .btn,
@@ -1599,6 +1614,19 @@ tbody tr:hover { background: rgba(17,92,58,0.02); }
         width: 100%;
         justify-content: center;
         margin: 0;
+    }
+
+    .table-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: flex-end;
+    }
+
+    .table-actions .btn {
+        position: relative;
+        z-index: 1;
+        pointer-events: auto;
     }
 
     .btn-sm { padding: 7px 10px; font-size: 12px; }
